@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medication-service-config
+  namespace: medication-repository
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "medication_repository"
+  DB_USER: "postgres"
+  REDIS_URL: "redis://redis-service:6379"
+  ALLOWED_ORIGINS: "https://medication-app.example.com"
+  LOG_LEVEL: "info"
+  RATE_LIMIT_WINDOW_MS: "900000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  BCRYPT_ROUNDS: "12"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: medication-service-secrets
+  namespace: medication-repository
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual encoded secrets
+  DB_PASSWORD: cGFzc3dvcmQ=  # "password" - change in production
+  JWT_SECRET: eW91ci1zdXBlci1zZWNyZXQtand0LWtleS1jaGFuZ2UtaW4tcHJvZHVjdGlvbg==  # change in production
+  SESSION_SECRET: eW91ci1zZXNzaW9uLXNlY3JldC1jaGFuZ2UtaW4tcHJvZHVjdGlvbg==  # change in production
+  EXTERNAL_API_KEY: eW91ci1leHRlcm5hbC1hcGkta2V5  # if needed

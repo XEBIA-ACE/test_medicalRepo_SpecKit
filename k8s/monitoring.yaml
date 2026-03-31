@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: medication-service-monitor
+  namespace: medication-repository
+  labels:
+    app: medication-service
+spec:
+  selector:
+    matchLabels:
+      app: medication-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: medication-service-alerts
+  namespace: medication-repository
+  labels:
+    app: medication-service
+spec:
+  groups:
+  - name: medication-service.rules
+    rules:
+    - alert: MedicationServiceDown
+      expr: up{job="medication-service"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Medication Service is down"
+        description: "Medication Service has been down for more than 1 minute."
+    
+    - alert: MedicationServiceHighErrorRate
+      expr: rate(http_requests_total{job="medication-service",status=~"5.."}[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High error rate in Medication Service"
+        description: "Error rate is {{ $value }} errors per second."
+    
+    - alert: MedicationServiceHighLatency
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="medication-service"}[5m])) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High latency in Medication Service"
+        description: "95th percentile latency is {{ $value }} seconds."
+    
+    - alert: MedicationServiceHighMemoryUsage
+      expr: container_memory_usage_bytes{pod=~"medication-service-.*"} / container_spec_memory_limit_bytes > 0.9
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage in Medication Service"
+        description: "Memory usage is {{ $value | humanizePercentage }}."

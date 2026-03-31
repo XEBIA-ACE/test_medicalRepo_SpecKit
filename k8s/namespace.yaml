@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: medication-repository
+  labels:
+    name: medication-repository
+    app.kubernetes.io/name: medication-repository-service
+    app.kubernetes.io/version: "1.0.0"
